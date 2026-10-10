@@ -1,0 +1,787 @@
+     
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>RPS Arena | Rock Paper Scissors</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --background: #0b1020;
+            --card: rgba(24, 32, 57, 0.85);
+            --purple: #8b5cf6;
+            --blue: #38bdf8;
+            --text: #f8fafc;
+            --muted: #94a3b8;
+            --border: rgba(148, 163, 184, 0.16);
+        }
+
+        body {
+            min-height: 100vh;
+            padding: 30px 20px;
+            font-family: Inter, Arial, sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(
+                    circle at 15% 10%,
+                    rgba(139, 92, 246, 0.18),
+                    transparent 35%
+                ),
+                radial-gradient(
+                    circle at 90% 80%,
+                    rgba(56, 189, 248, 0.12),
+                    transparent 35%
+                ),
+                var(--background);
+        }
+
+        button {
+            font: inherit;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            margin: auto;
+        }
+
+        /* Navigation */
+
+        .navbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 65px;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 21px;
+            font-weight: 800;
+            letter-spacing: 1px;
+        }
+
+        .brand-icon {
+            display: grid;
+            place-items: center;
+            width: 43px;
+            height: 43px;
+            border-radius: 14px;
+            background: linear-gradient(
+                135deg,
+                var(--purple),
+                #6366f1
+            );
+            box-shadow: 0 0 25px rgba(139, 92, 246, 0.3);
+        }
+
+        .status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #86efac;
+            font-size: 12px;
+            background: rgba(34, 197, 94, 0.08);
+            border: 1px solid rgba(34, 197, 94, 0.2);
+            padding: 10px 14px;
+            border-radius: 30px;
+        }
+
+        .status-dot {
+            width: 7px;
+            height: 7px;
+            background: #4ade80;
+            border-radius: 50%;
+        }
+
+        /* Hero section */
+
+        .hero {
+            text-align: center;
+            margin-bottom: 42px;
+        }
+
+        .eyebrow {
+            display: inline-block;
+            color: #c4b5fd;
+            background: rgba(139, 92, 246, 0.12);
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            padding: 8px 15px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            margin-bottom: 22px;
+        }
+
+        .hero h1 {
+            font-size: clamp(36px, 6vw, 58px);
+            line-height: 1.1;
+            font-weight: 900;
+            letter-spacing: -2px;
+            margin-bottom: 16px;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(
+                90deg,
+                #a78bfa,
+                #60a5fa
+            );
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .hero p {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.7;
+        }
+
+        /* Scoreboard */
+
+        .scoreboard {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            align-items: center;
+            gap: 18px;
+            margin-bottom: 38px;
+        }
+
+        .score-card {
+            position: relative;
+            overflow: hidden;
+            text-align: center;
+            padding: 26px 15px;
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 22px;
+            backdrop-filter: blur(12px);
+            transition: transform 0.25s, border-color 0.25s;
+        }
+
+        .score-card:hover {
+            transform: translateY(-4px);
+            border-color: rgba(139, 92, 246, 0.5);
+        }
+
+        .player-icon {
+            font-size: 27px;
+            margin-bottom: 10px;
+        }
+
+        .score-card h3 {
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            font-size: 11px;
+            margin-bottom: 12px;
+        }
+
+        .score-card h2 {
+            font-size: 48px;
+            line-height: 1;
+        }
+
+        #playerScore {
+            color: #c4b5fd;
+        }
+
+        #computerScore {
+            color: #7dd3fc;
+        }
+
+        .versus {
+            color: #64748b;
+            font-weight: 900;
+            font-size: 13px;
+        }
+
+        /* Game controls */
+
+        .game-panel {
+            background: rgba(17, 24, 45, 0.72);
+            border: 1px solid var(--border);
+            border-radius: 24px;
+            padding: 30px;
+            margin-bottom: 22px;
+        }
+
+        .section-heading {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .section-heading h2 {
+            font-size: 18px;
+            margin-bottom: 8px;
+        }
+
+        .section-heading p {
+            font-size: 13px;
+            color: var(--muted);
+        }
+
+        .choices {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .choice {
+            min-width: 0;
+            padding: 23px 10px;
+            color: var(--text);
+            background: linear-gradient(
+                145deg,
+                rgba(37, 48, 78, 0.9),
+                rgba(21, 28, 49, 0.9)
+            );
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+        }
+
+        .choice:hover:not(:disabled) {
+            transform: translateY(-6px);
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, 0.14);
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.13);
+        }
+
+        .choice:active:not(:disabled) {
+            transform: scale(0.96);
+        }
+
+        .choice:disabled {
+            opacity: 0.45;
+            cursor: not-allowed;
+        }
+
+        .choice-emoji {
+            display: block;
+            font-size: 39px;
+            margin-bottom: 14px;
+        }
+
+        .choice-name {
+            display: block;
+            font-size: 15px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+
+        .choice-description {
+            display: block;
+            color: var(--muted);
+            font-size: 11px;
+        }
+
+        /* Result panel */
+
+        .result-panel {
+            text-align: center;
+            background: linear-gradient(
+                120deg,
+                rgba(139, 92, 246, 0.12),
+                rgba(56, 189, 248, 0.06)
+            );
+            border: 1px solid rgba(139, 92, 246, 0.25);
+            border-radius: 20px;
+            padding: 27px 20px;
+            margin-bottom: 22px;
+        }
+
+        .result-label {
+            color: #a78bfa;
+            font-size: 10px;
+            font-weight: 800;
+            letter-spacing: 2px;
+            margin-bottom: 13px;
+        }
+
+        #result {
+            font-size: clamp(21px, 4vw, 29px);
+            margin-bottom: 12px;
+            overflow-wrap: anywhere;
+        }
+
+        #moves {
+            color: var(--muted);
+            font-size: 14px;
+            line-height: 1.8;
+        }
+
+        #round {
+            color: #cbd5e1;
+            font-size: 12px;
+            margin-top: 18px;
+        }
+
+        /* Round progress */
+
+        .progress-track {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 18px;
+        }
+
+        .progress-dot {
+            width: 9px;
+            height: 9px;
+            background: #334155;
+            border-radius: 50%;
+            transition: background 0.2s;
+        }
+
+        .progress-dot.active {
+            background: #a78bfa;
+            box-shadow: 0 0 12px rgba(167, 139, 250, 0.6);
+        }
+
+        /* Restart button */
+
+        .restart {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 9px;
+            margin: 0 auto;
+            padding: 13px 22px;
+            color: #cbd5e1;
+            background: transparent;
+            border: 1px solid #334155;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .restart:hover {
+            color: white;
+            border-color: var(--purple);
+            background: rgba(139, 92, 246, 0.1);
+        }
+
+        .footer {
+            text-align: center;
+            color: #64748b;
+            font-size: 12px;
+            margin-top: 45px;
+        }
+
+        /* Animation */
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(8px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-panel.updated {
+            animation: appear 0.3s ease;
+        }
+
+        /* Mobile layout */
+
+        @media (max-width: 600px) {
+            body {
+                padding: 22px 14px;
+            }
+
+            .navbar {
+                margin-bottom: 45px;
+            }
+
+            .brand {
+                font-size: 16px;
+                gap: 8px;
+            }
+
+            .brand-icon {
+                width: 36px;
+                height: 36px;
+            }
+
+            .status {
+                font-size: 10px;
+                padding: 8px 10px;
+            }
+
+            .scoreboard {
+                gap: 10px;
+            }
+
+            .score-card {
+                padding: 22px 8px;
+                border-radius: 16px;
+            }
+
+            .score-card h2 {
+                font-size: 39px;
+            }
+
+            .game-panel {
+                padding: 20px 13px;
+            }
+
+            .choices {
+                gap: 8px;
+            }
+
+            .choice {
+                padding: 19px 5px;
+                border-radius: 13px;
+            }
+
+            .choice-emoji {
+                font-size: 31px;
+            }
+
+            .choice-name {
+                font-size: 13px;
+            }
+
+            .choice-description {
+                font-size: 10px;
+            }
+
+            .result-panel {
+                padding: 24px 13px;
+            }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *,
+            *::before,
+            *::after {
+                animation-duration: 0.01ms !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <main class="container">
+
+        <nav class="navbar">
+            <div class="brand">
+                <div class="brand-icon">✊</div>
+                <span>RPS ARENA</span>
+            </div>
+
+            <div class="status">
+                <span class="status-dot"></span>
+                READY TO PLAY
+            </div>
+        </nav>
+
+        <header class="hero">
+            <div class="eyebrow">⚡ THE ULTIMATE SHOWDOWN</div>
+
+            <h1>Make your <span>move.</span></h1>
+
+            <p>
+                Challenge the computer.
+                Outsmart your opponent.<br>
+                First to 3 wins takes the match.
+            </p>
+        </header>
+
+        <section class="scoreboard" aria-label="Match scoreboard">
+
+            <div class="score-card">
+                <div class="player-icon">🧑‍💻</div>
+                <h3>You</h3>
+                <h2 id="playerScore">0</h2>
+            </div>
+
+            <div class="versus">VS</div>
+
+            <div class="score-card">
+                <div class="player-icon">🤖</div>
+                <h3>Computer</h3>
+                <h2 id="computerScore">0</h2>
+            </div>
+
+        </section>
+
+        <section class="game-panel">
+
+            <div class="section-heading">
+                <h2>Choose your move</h2>
+                <p>Make your selection and see who wins the round.</p>
+            </div>
+
+            <div class="choices">
+
+                <button
+                    class="choice"
+                    onclick="playGame('rock')"
+                    aria-label="Choose rock"
+                >
+                    <span class="choice-emoji">🪨</span>
+                    <span class="choice-name">Rock</span>
+                    <span class="choice-description">Crush scissors</span>
+                </button>
+
+                <button
+                    class="choice"
+                    onclick="playGame('paper')"
+                    aria-label="Choose paper"
+                >
+                    <span class="choice-emoji">📄</span>
+                    <span class="choice-name">Paper</span>
+                    <span class="choice-description">Cover rock</span>
+                </button>
+
+                <button
+                    class="choice"
+                    onclick="playGame('scissors')"
+                    aria-label="Choose scissors"
+                >
+                    <span class="choice-emoji">✂️</span>
+                    <span class="choice-name">Scissors</span>
+                    <span class="choice-description">Cut paper</span>
+                </button>
+
+            </div>
+
+        </section>
+
+        <section
+            class="result-panel"
+            id="resultPanel"
+            aria-live="polite"
+        >
+            <div class="result-label">MATCH UPDATE</div>
+
+            <h2 id="result">Ready to battle?</h2>
+
+            <p id="moves">
+                Choose your move to begin the match.
+            </p>
+
+            <h3 id="round">Round 1</h3>
+
+            <div class="progress-track" id="progressTrack">
+                <span class="progress-dot active"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+                <span class="progress-dot"></span>
+            </div>
+        </section>
+
+        <button class="restart" onclick="resetGame()">
+            ↻ Restart Match
+        </button>
+
+        <footer class="footer">
+            RPS ARENA · Built for the thrill of the game
+        </footer>
+
+    </main>
+
+    <script>
+        let playerScore = 0;
+        let computerScore = 0;
+        let roundsPlayed = 0;
+        let gameOver = false;
+        let requestInProgress = false;
+
+        const playerScoreElement =
+            document.getElementById("playerScore");
+
+        const computerScoreElement =
+            document.getElementById("computerScore");
+
+        const resultElement =
+            document.getElementById("result");
+
+        const movesElement =
+            document.getElementById("moves");
+
+        const roundElement =
+            document.getElementById("round");
+
+        const resultPanel =
+            document.getElementById("resultPanel");
+
+        const progressDots =
+            document.querySelectorAll(".progress-dot");
+
+        const choiceButtons =
+            document.querySelectorAll(".choice");
+
+        function updateProgress() {
+            progressDots.forEach((dot, index) => {
+                dot.classList.toggle(
+                    "active",
+                    index < Math.min(roundsPlayed + 1, 5)
+                );
+            });
+        }
+
+        function showResultAnimation() {
+            resultPanel.classList.remove("updated");
+
+            // Restart the CSS animation.
+            void resultPanel.offsetWidth;
+
+            resultPanel.classList.add("updated");
+        }
+
+        async function playGame(playerMove) {
+            if (gameOver || requestInProgress) {
+                return;
+            }
+
+            requestInProgress = true;
+
+            choiceButtons.forEach(button => {
+                button.disabled = true;
+            });
+
+            resultElement.textContent = "Making your move...";
+            movesElement.textContent =
+                "Waiting for the computer...";
+            showResultAnimation();
+
+            try {
+                const response = await fetch("/play", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        move: playerMove
+                    })
+                });
+
+                const data = await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "Something went wrong"
+                    );
+                }
+
+                const computerMove = data.computerMove;
+                const result = data.result;
+
+                if (result === "You win!") {
+                    playerScore++;
+                } else if (result === "Computer wins!") {
+                    computerScore++;
+                }
+
+                roundsPlayed++;
+
+                playerScoreElement.textContent = playerScore;
+                computerScoreElement.textContent = computerScore;
+
+                const moveEmoji = {
+                    rock: "🪨",
+                    paper: "📄",
+                    scissors: "✂️"
+                };
+
+                movesElement.textContent =
+                    "You: " + moveEmoji[playerMove] + " " + playerMove +
+                    "  ·  Computer: " +
+                    moveEmoji[computerMove] + " " + computerMove;
+
+                if (playerScore === 3 || computerScore === 3) {
+                    gameOver = true;
+
+                    resultElement.textContent =
+                        playerScore === 3
+                            ? "🏆 You won the match!"
+                            : "🤖 Computer won the match!";
+
+                    roundElement.textContent =
+                        "Match completed in " +
+                        roundsPlayed + " rounds";
+
+                } else {
+                    resultElement.textContent =
+                        result === "You win!"
+                            ? "🎉 You win this round!"
+                            : result === "Computer wins!"
+                            ? "💻 Computer wins this round!"
+                            : "🤝 It's a draw!";
+
+                    roundElement.textContent =
+                        "Round " + (roundsPlayed + 1) + " of 5";
+                }
+
+                updateProgress();
+                showResultAnimation();
+
+            } catch (error) {
+                resultElement.textContent = "Connection error";
+
+                movesElement.textContent =
+                    "Unable to reach the backend. " +
+                    "Check that your server is running.";
+
+                console.error("Game error:", error);
+
+            } finally {
+                requestInProgress = false;
+
+                choiceButtons.forEach(button => {
+                    button.disabled = gameOver;
+                });
+            }
+        }
+
+        function resetGame() {
+            playerScore = 0;
+            computerScore = 0;
+            roundsPlayed = 0;
+            gameOver = false;
+
+            playerScoreElement.textContent = "0";
+            computerScoreElement.textContent = "0";
+
+            resultElement.textContent = "Ready to battle?";
+
+            movesElement.textContent =
+                "Choose your move to begin the match.";
+
+            roundElement.textContent = "Round 1";
+
+            choiceButtons.forEach(button => {
+                button.disabled = false;
+            });
+
+            updateProgress();
+            showResultAnimation();
+        }
+    </script>
+
+</body>
+</html>
